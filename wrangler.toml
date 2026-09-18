@@ -1,0 +1,15 @@
+name = "ai-app-manager"
+main = "src/index.js"
+compatibility_date = "2026-09-18"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Create a D1 database named ai-app-manager-db in Cloudflare,
+# then either bind it in the Cloudflare dashboard as DB or fill in the
+# database_id below before using Wrangler CLI.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "ai-app-manager-db"
+# database_id = "PASTE_YOUR_D1_DATABASE_ID_HERE"
