@@ -1,0 +1,81 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  avatar TEXT,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  userId INTEGER NOT NULL,
+  expiresAt TEXT NOT NULL,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  appName TEXT,
+  sender TEXT,
+  senderAvatar TEXT,
+  content TEXT,
+  category TEXT,
+  importance TEXT,
+  urgency TEXT,
+  replyRequired INTEGER DEFAULT 0,
+  isSensitive INTEGER DEFAULT 0,
+  isRead INTEGER DEFAULT 0,
+  suggestedReply TEXT,
+  timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+  userId INTEGER NOT NULL,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS connected_apps (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  appName TEXT NOT NULL,
+  isEnabled INTEGER DEFAULT 1,
+  notificationCount INTEGER DEFAULT 0,
+  lastSync TEXT,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS otps (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  appName TEXT,
+  otpValue TEXT,
+  masked TEXT,
+  expiresAt TEXT,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS rules (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  name TEXT,
+  whenCondition TEXT,
+  thenAction TEXT,
+  isEnabled INTEGER DEFAULT 1,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  action TEXT,
+  details TEXT,
+  status TEXT,
+  timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_user_time ON messages(userId, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(userId);
+CREATE INDEX IF NOT EXISTS idx_otps_user_expiry ON otps(userId, expiresAt);

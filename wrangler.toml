@@ -1,0 +1,13 @@
+name = "ai-app-manager"
+main = "src/index.js"
+compatibility_date = "2026-09-18"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# After creating the D1 database in Cloudflare, bind it as DB.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "ai-app-manager-db"
+# database_id = "PASTE_YOUR_D1_DATABASE_ID_HERE"

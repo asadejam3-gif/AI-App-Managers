@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#075E54">
+    <title>AI App Manager - WhatsApp Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* WhatsApp/Telegram inspired colors */
+            --primary: #00BFA5;           /* Cyan/Teal */
+            --primary-dark: #00897B;      /* Dark Teal */
+            --accent: #FFD54F;            /* Golden Yellow */
+            --accent-dark: #FBC02D;       /* Dark Yellow */
+            
+            --background: #0A0E27;        /* Very dark blue-black */
+            --surface: #111B3C;           /* Dark blue */
+            --card: #1A2859;              /* Card dark blue */
+            --chat-bg: #0D1929;           /* Chat background */
+            
+            --text-primary: #FFFFFF;      /* White text */
+            --text-secondary: #B0BEC5;   /* Light gray text */
+            --text-muted: #78909C;       /* Muted gray */
+            
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            
+            --border: rgba(0, 191, 165, 0.1);
+            --shadow: 0 4px 12px rgba(0, 191, 165, 0.15);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+            z-index: 100;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            font-size: 28px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .header-text h1 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-text p {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px;
+            background: var(--background);
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* ===== CARDS & MESSAGES ===== */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:active {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* ===== MESSAGE CHAT STYLE ===== */
+        .message-bubble {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .message-avatar {
+            font-size: 32px;
+            min-width: 32px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .message-sender {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--primary);
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .message-app {
+            font-size: 10px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .message-text {
+            background: var(--chat-bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 3px solid var(--primary);
+            margin-top: 4px;
+        }
+
+        .message-badge {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .badge-urgent {
+            background: rgba(244, 67, 54, 0.2);
+            color: #FF5252;
+        }
+
+        .badge-important {
+            background: rgba(255, 213, 79, 0.2);
+            color: var(--accent);
+        }
+
+        .badge-normal {
+            background: rgba(76, 175, 80, 0.2);
+            color: #66BB6A;
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            flex: 1;
+            min-width: 80px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card:active {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ===== GRID ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 16px;
+            margin-bottom: 10px;
+            padding: 0 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== SEARCH BAR ===== */
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--background);
+            padding-top: 4px;
+            padding-bottom: 8px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(0, 191, 165, 0.2);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--background);
+            border: none;
+            padding: 11px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--card);
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+
+        /* ===== BOTTOM NAVIGATION ===== */
+        .bottom-nav {
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            flex-shrink: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 10px;
+            border-top: 3px solid transparent;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-item:active,
+        .nav-item.active {
+            color: var(--primary);
+            border-top-color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 2px;
+        }
+
+        /* ===== SPACER ===== */
+        .spacer {
+            height: 60px;
+        }
+
+        /* ===== STATUS INDICATOR ===== */
+        .status-online {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-left: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        /* ===== FLOATING ACTION BUTTON ===== */
+        .fab {
+            position: fixed;
+            bottom: 70px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+            box-shadow: 0 8px 16px rgba(0, 191, 165, 0.3);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+            margin: 0 2px;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { opacity: 0.3; transform: scaleY(1); }
+            40% { opacity: 1; transform: scaleY(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="container"></div>
+
+    <script>
+        // ===== CONFIG =====
+        const API_URL = '/api';
+        let token = localStorage.getItem('token');
+        let userId = localStorage.getItem('userId');
+
+        // ===== STATE =====
+        let appState = {
+            currentScreen: token ? 'dashboard' : 'login',
+            messages: [],
+            apps: [],
+            otps: [],
+            expandedMessageId: null,
+            searchQuery: '',
+            filter: 'all',
+            user: null
+        };
+
+        // ===== API CALLS =====
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+
+            if (data) options.body = JSON.stringify(data);
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, options);
+                return await response.json();
+            } catch (err) {
+                console.error('API Error:', err);
+                return { error: err.message };
+            }
+        }
+
+        // ===== AUTH =====
+        async function login(email, password) {
+            const result = await apiCall('/auth/login', 'POST', { email, password });
+            if (result.token) {
+                token = result.token;
+                userId = result.userId;
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', userId);
+                appState.currentScreen = 'dashboard';
+                loadMessages();
+                loadApps();
+                renderApp();
+            } else {
+                alert('❌ Login failed: ' + result.error);
+            }
+        }
+
+        async function register(username, email, password) {
+            const result = await apiCall('/auth/register', 'POST', { username, email, password });
+            if (result.token) {
+                token = result.token;
+                userId = result.userId;
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', userId);
+                appState.currentScreen = 'dashboard';
+                loadMessages();
+                loadApps();
+                renderApp();
+            } else {
+                alert('❌ Registration failed: ' + result.error);
+            }
+        }
+
+        // ===== LOAD DATA =====
+        async function loadMessages() {
+            const result = await apiCall('/messages');
+            appState.messages = Array.isArray(result) ? result : [];
+            if (token) renderApp();
+        }
+
+        async function loadApps() {
+            const result = await apiCall('/apps');
+            appState.apps = Array.isArray(result) ? result : [];
+            if (token) renderApp();
+        }
+
+        async function loadOTPs() {
+            const result = await apiCall('/otps');
+            appState.otps = Array.isArray(result) ? result : [];
+            if (token) renderApp();
+        }
+
+        async function addMessage(messageData) {
+            const result = await apiCall('/messages', 'POST', messageData);
+            if (result.success) {
+                loadMessages();
+            }
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+            return date.toLocaleDateString();
+        }
+
+        // ===== RENDER FUNCTIONS =====
+        function renderApp() {
+            const root = document.getElementById('root');
+            if (!root) return;
+
+            if (!token) {
+                root.innerHTML = renderLogin();
+            } else {
+                root.innerHTML = `
+                    <div class="header">
+                        <div class="header-title">
+                            <div class="header-icon">🤖</div>
+                            <div class="header-text">
+                                <h1>AI Manager</h1>
+                                <p>WhatsApp Style<span class="status-online"></span></p>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn-icon" onclick="app.setScreen('search')">🔍</button>
+                            <button class="btn-icon" onclick="app.logout()">🚪</button>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        ${renderScreen()}
+                        <div class="spacer"></div>
+                    </div>
+
+                    <button class="fab" onclick="app.setScreen('compose')">➕</button>
+
+                    <div class="bottom-nav">
+                        <div class="nav-item ${appState.currentScreen === 'dashboard' ? 'active' : ''}" onclick="app.setScreen('dashboard')">
+                            <div class="nav-icon">💬</div>
+                            <div>Chats</div>
+                        </div>
+                        <div class="nav-item ${appState.currentScreen === 'apps' ? 'active' : ''}" onclick="app.setScreen('apps')">
+                            <div class="nav-icon">📲</div>
+                            <div>Apps</div>
+                        </div>
+                        <div class="nav-item ${appState.currentScreen === 'otp' ? 'active' : ''}" onclick="app.setScreen('otp')">
+                            <div class="nav-icon">🔐</div>
+                            <div>OTP</div>
+                        </div>
+                        <div class="nav-item ${appState.currentScreen === 'settings' ? 'active' : ''}" onclick="app.setScreen('settings')">
+                            <div class="nav-icon">⚙️</div>
+                            <div>Settings</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderLogin() {
+            return `
+                <div style="display: flex; flex-direction: column; height: 100vh; background: linear-gradient(135deg, #075E54, #00BFA5); align-items: center; justify-content: center; padding: 20px;">
+                    <div style="font-size: 64px; margin-bottom: 20px;">🤖</div>
+                    <h1 style="font-size: 28px; margin-bottom: 8px; color: white;">AI App Manager</h1>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 40px;">WhatsApp Style • Real Backend</p>
+
+                    <div style="width: 100%; max-width: 300px; background: rgba(255,255,255,0.1); padding: 24px; border-radius: 16px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                        <input type="email" id="email" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); border-radius: 8px; color: white;" />
+                        <input type="password" id="password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); border-radius: 8px; color: white;" />
+                        <input type="text" id="username" placeholder="Username (for register)" style="width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); border-radius: 8px; color: white;" />
+
+                        <button onclick="app.handleLogin()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #00BFA5, #FFD54F); border: none; border-radius: 8px; color: #075E54; font-weight: 700; margin-bottom: 8px; cursor: pointer;">Login</button>
+                        <button onclick="app.handleRegister()" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.2); border: 1px solid white; border-radius: 8px; color: white; font-weight: 700; cursor: pointer;">Register</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScreen() {
+            switch (appState.currentScreen) {
+                case 'dashboard': return renderDashboard();
+                case 'apps': return renderApps();
+                case 'otp': return renderOTP();
+                case 'settings': return renderSettings();
+                case 'search': return renderSearch();
+                case 'compose': return renderCompose();
+                default: return renderDashboard();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+        }
+
+        function getVisibleMessages() {
+            const q = appState.searchQuery.trim();
+            return appState.messages.filter(msg => {
+                const matchesSearch = !q || [msg.content, msg.sender, msg.appName, msg.category]
+                    .some(v => String(v ?? '').toLowerCase().includes(q));
+                const matchesFilter = appState.filter === 'all'
+                    || (appState.filter === 'unread' && !msg.isRead)
+                    || (appState.filter === 'urgent' && (msg.urgency === 'URGENT' || msg.urgency === 'HIGH'));
+                return matchesSearch && matchesFilter;
+            });
+        }
+
+        function renderSearch() {
+            return `
+                <div class="section-title">🔍 Search Messages</div>
+                <div class="search-bar">
+                    <input id="globalSearch" type="text" class="search-input" placeholder="Search sender, app or message..." value="${escapeHtml(appState.searchQuery)}" oninput="app.searchMessages(this.value)" />
+                </div>
+                ${getVisibleMessages().map(renderMessageCard).join('') || '<div class="card">No messages found.</div>'}
+            `;
+        }
+
+        function renderCompose() {
+            return `
+                <div class="section-title">➕ Save a Message</div>
+                <div class="card">
+                    <input id="newApp" class="search-input" placeholder="App name (e.g. WhatsApp)" style="margin-bottom:10px;" />
+                    <input id="newSender" class="search-input" placeholder="Sender" style="margin-bottom:10px;" />
+                    <textarea id="newContent" class="search-input" placeholder="Message" style="min-height:120px; resize:vertical; margin-bottom:10px;"></textarea>
+                    <button class="btn" onclick="app.saveMessage()" style="width:100%;">Save Message</button>
+                </div>
+            `;
+        }
+
+        function renderMessageCard(msg) {
+            return `
+                <div class="message-bubble">
+                    <div class="message-avatar">${escapeHtml(msg.senderAvatar || '👤')}</div>
+                    <div class="message-content" onclick="app.toggleMessage(${Number(msg.id)})">
+                        <div class="message-header">
+                            <div>
+                                <div class="message-sender">${escapeHtml(msg.sender || 'Unknown')}</div>
+                                <div class="message-app">${escapeHtml(msg.appName || 'Unknown app')}</div>
+                            </div>
+                            <div class="message-time">${formatTime(msg.timestamp)}</div>
+                        </div>
+                        <div class="message-text">${escapeHtml(msg.content || '')}</div>
+                        ${msg.urgency === 'URGENT' ? '<span class="message-badge badge-urgent">🔴 URGENT</span>' : ''}
+                        ${msg.importance === 'HIGH' || msg.importance === 'CRITICAL' ? '<span class="message-badge badge-important">⭐ IMPORTANT</span>' : ''}
+                    </div>
+                </div>`;
+        }
+
+        function renderDashboard() {
+            const unreadCount = appState.messages.filter(m => !m.isRead).length;
+            const urgentCount = appState.messages.filter(m => m.urgency === 'URGENT' || m.urgency === 'HIGH').length;
+
+            return `
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="🔍 Search messages..." onkeyup="app.searchMessages(this.value)" />
+                </div>
+
+                <div class="section-title">📊 Quick Stats</div>
+                <div class="grid">
+                    <div class="stat-card" onclick="app.filterMessages('all')">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-value">${appState.messages.length}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card" onclick="app.filterMessages('unread')">
+                        <div class="stat-icon">📬</div>
+                        <div class="stat-value">${unreadCount}</div>
+                        <div class="stat-label">Unread</div>
+                    </div>
+                    <div class="stat-card" onclick="app.filterMessages('urgent')">
+                        <div class="stat-icon">🔴</div>
+                        <div class="stat-value">${urgentCount}</div>
+                        <div class="stat-label">Urgent</div>
+                    </div>
+                    <div class="stat-card" onclick="app.setScreen('otp')">
+                        <div class="stat-icon">🔐</div>
+                        <div class="stat-value">${appState.otps.length}</div>
+                        <div class="stat-label">OTPs</div>
+                    </div>
+                </div>
+
+                <div class="section-title">💬 Messages</div>
+                ${getVisibleMessages().map(renderMessageCard).join('') || '<div class="card">No messages yet. Tap ➕ to save one.</div>'}
+            `;
+        }
+
+        function renderApps() {
+            return `
+                <div class="section-title">📲 Connected Apps</div>
+                ${appState.apps.map(app => `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div><strong>${app.appName}</strong></div>
+                            <div>${app.isEnabled ? '✅' : '⭕'}</div>
+                        </div>
+                    </div>
+                `).join('')}
+                <button class="btn" onclick="alert('Add app feature coming soon')" style="width: 100%; margin-top: 16px;">+ Add App</button>
+            `;
+        }
+
+        function renderOTP() {
+            return `
+                <div class="section-title">🔐 OTP Vault</div>
+                ${appState.otps.map(otp => `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div><strong>${otp.appName}</strong></div>
+                                <div style="font-size: 16px; color: var(--accent); margin-top: 6px; font-weight: 700;">••••••</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${formatTime(otp.createdAt)}</div>
+                            </div>
+                            <button class="btn btn-secondary btn-small" onclick="app.copy('${otp.otpValue}')">Copy</button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function renderSettings() {
+            return `
+                <div class="section-title">⚙️ Settings</div>
+                <div class="card" onclick="alert('Coming soon')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div><strong>Account</strong></div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Manage profile</div>
+                        </div>
+                        <span style="color: var(--primary);">›</span>
+                    </div>
+                </div>
+                <div class="card" onclick="alert('Coming soon')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div><strong>Privacy</strong></div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Data & Security</div>
+                        </div>
+                        <span style="color: var(--primary);">›</span>
+                    </div>
+                </div>
+                <div class="card" style="background: rgba(0, 191, 165, 0.1); border-color: var(--primary); margin-top: 20px; text-align: center;">
+                    <div><strong>AI App Manager</strong></div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">v1.0.0 • 100% Free & Open</div>
+                </div>
+            `;
+        }
+
+        // ===== APP CONTROLLER =====
+        const app = {
+            setScreen: (screen) => {
+                appState.currentScreen = screen;
+                renderApp();
+                window.scrollTo(0, 0);
+            },
+
+            handleLogin: () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if (email && password) login(email, password);
+            },
+
+            handleRegister: () => {
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if (username && email && password) register(username, email, password);
+            },
+
+            logout: () => {
+                token = null;
+                userId = null;
+                localStorage.clear();
+                appState.currentScreen = 'login';
+                renderApp();
+            },
+
+            toggleMessage: (id) => {
+                appState.expandedMessageId = appState.expandedMessageId === id ? null : id;
+                renderApp();
+            },
+
+            searchMessages: (query) => {
+                appState.searchQuery = query.toLowerCase();
+                renderApp();
+            },
+
+            saveMessage: async () => {
+                const appName = document.getElementById('newApp')?.value.trim();
+                const sender = document.getElementById('newSender')?.value.trim();
+                const content = document.getElementById('newContent')?.value.trim();
+                if (!appName || !sender || !content) return alert('Please fill all fields.');
+                const result = await addMessage({
+                    appName, sender, senderAvatar: '👤', content,
+                    category: 'GENERAL', importance: 'MEDIUM', urgency: 'LOW',
+                    replyRequired: false, isSensitive: false,
+                    suggestedReply: ''
+                });
+                if (result?.success) {
+                    appState.currentScreen = 'dashboard';
+                    await loadMessages();
+                    renderApp();
+                } else {
+                    alert('Could not save message: ' + (result?.error || 'Unknown error'));
+                }
+            },
+
+            copy: (text) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Copied!');
+                });
+            },
+
+            filterMessages: (filter) => {
+                appState.filter = filter;
+                appState.currentScreen = 'dashboard';
+                renderApp();
+            }
+        };
+
+        // ===== INIT =====
+        if (token) {
+            loadMessages();
+            loadApps();
+            loadOTPs();
+        }
+        renderApp();
+    </script>
+</body>
+</html>
